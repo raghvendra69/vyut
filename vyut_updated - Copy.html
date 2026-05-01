@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vyut — Digital Agency, Jodhpur</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#000;--bg2:#080808;--bg3:#111111;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#f0efe8;--text2:rgba(240,239,232,0.5);--text3:rgba(240,239,232,0.25);
+  --gold:#c9a96e;--gold2:rgba(201,169,110,0.15);--gold3:rgba(201,169,110,0.08);
+  --fh:'Helvetica', 'Arial', sans-serif;--fb:var(--fh);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);line-height:1.6;font-size:16px;overflow-x:hidden}
+
+#three-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+.page{position:relative;z-index:1;display:none;min-height:100vh;animation:fadeUp 0.55s cubic-bezier(0.16,1,0.3,1) both}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 3rem;background:rgba(0,0,0,0.75);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200}
+.nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;cursor:pointer}
+.logo-img{width:36px;height:36px;object-fit:contain;filter:brightness(0) invert(1)}
+.logo-text{font-family:var(--fh);font-size:1.5rem;font-weight:800;color:var(--text);letter-spacing:-0.02em}
+.logo-text span{color:var(--gold)}
+.nav-links{display:flex;gap:2rem;list-style:none;align-items:center}
+.nav-links a{font-size:0.82rem;font-weight:400;color:var(--text2);text-decoration:none;letter-spacing:0.04em;transition:color 0.2s;cursor:pointer}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--gold)!important;color:#000!important;padding:0.5rem 1.25rem!important;border-radius:2rem;font-weight:600!important}
+
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:7rem 3rem 5rem;position:relative;overflow:hidden}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,black 20%,transparent 100%)}
+.hero::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:0}
+
+.hero-eyebrow{display:inline-flex;align-items:center;gap:0.6rem;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:2rem;animation:fadeUp 0.6s 0.1s both;position:relative;z-index:2}
+.hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--gold)}
+.hero-title{font-family:var(--fh);font-size:clamp(3rem,7vw,6.5rem);font-weight:800;line-height:1.0;letter-spacing:-0.03em;margin-bottom:1.75rem;animation:fadeUp 0.6s 0.2s both;position:relative;z-index:2}
+.hero-title .dim{color:var(--text3)}
+.hero-desc{font-size:1.05rem;font-weight:300;color:var(--text2);max-width:460px;line-height:1.8;margin-bottom:3rem;animation:fadeUp 0.6s 0.3s both;position:relative;z-index:2}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap;animation:fadeUp 0.6s 0.4s both;position:relative;z-index:2}
+.btn-gold{background:var(--gold);color:#000;padding:0.85rem 2rem;border-radius:2rem;font-family:var(--fb);font-size:0.875rem;font-weight:600;border:none;cursor:pointer;transition:opacity 0.2s,transform 0.2s;letter-spacing:0.01em}
+.btn-gold:hover{opacity:0.85;transform:translateY(-2px)}
+.btn-ghost{color:var(--text);padding:0.85rem 2rem;border-radius:2rem;font-family:var(--fb);font-size:0.875rem;border:1px solid var(--border2);cursor:pointer;background:transparent;transition:border-color 0.2s}
+.btn-ghost:hover{border-color:var(--gold)}
+.hero-bg-word{position:absolute;right:-1rem;bottom:3rem;font-family:var(--fh);font-size:clamp(7rem,18vw,16rem);font-weight:800;color:rgba(255,255,255,0.018);letter-spacing:-0.04em;pointer-events:none;line-height:1;user-select:none;z-index:1}
+.hero-stats{display:flex;gap:3rem;margin-top:4.5rem;padding-top:2.5rem;border-top:1px solid var(--border);animation:fadeUp 0.6s 0.5s both;position:relative;z-index:2}
+.stat-n{font-family:var(--fh);font-size:2rem;font-weight:700;color:var(--text)}
+.stat-n em{color:var(--gold);font-style:normal}
+.stat-l{font-size:0.75rem;color:var(--text3);letter-spacing:0.06em;margin-top:2px}
+
+.orbit-wrap{position:absolute;right:8%;top:50%;transform:translateY(-50%);width:420px;height:420px;pointer-events:none;z-index:1;animation:fadeUp 1s 0.6s both}
+@media(max-width:900px){.orbit-wrap{display:none}}
+.orbit{position:absolute;border-radius:50%;border:1px solid;animation:spin linear infinite}
+.orbit-1{inset:0;border-color:rgba(201,169,110,0.12);animation-duration:18s}
+.orbit-2{inset:40px;border-color:rgba(201,169,110,0.08);animation-duration:28s;animation-direction:reverse}
+.orbit-3{inset:90px;border-color:rgba(201,169,110,0.06);animation-duration:14s}
+.orbit-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);position:absolute;top:-3.5px;left:50%;transform:translateX(-50%);box-shadow:0 0 12px var(--gold),0 0 24px rgba(201,169,110,0.4)}
+.orbit-dot-sm{width:4px;height:4px;border-radius:50%;background:rgba(201,169,110,0.7);position:absolute;top:-2px;left:50%;transform:translateX(-50%)}
+.orbit-center{position:absolute;inset:155px;border-radius:50%;border:1px solid rgba(201,169,110,0.2);display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(201,169,110,0.06) 0%,transparent 70%)}
+.orbit-center-dot{width:18px;height:18px;border-radius:50%;background:var(--gold);box-shadow:0 0 20px var(--gold),0 0 60px rgba(201,169,110,0.3);animation:pulse 2s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 20px var(--gold),0 0 60px rgba(201,169,110,0.3)}50%{box-shadow:0 0 30px var(--gold),0 0 90px rgba(201,169,110,0.5)}}
+
+section{padding:6rem 3rem;position:relative}
+.stag{font-size:0.68rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:0.5rem;margin-bottom:1.25rem}
+.stag::before{content:'';width:18px;height:1px;background:var(--gold)}
+.stitle{font-family:var(--fh);font-size:clamp(2rem,4vw,3rem);font-weight:700;line-height:1.1;letter-spacing:-0.025em;color:var(--text);margin-bottom:1rem}
+.ssub{font-size:1rem;color:var(--text2);font-weight:300;max-width:460px;line-height:1.8}
+
+.services-sec{background:rgba(8,8,8,0.82);backdrop-filter:blur(2px)}
+#proc{background:rgba(0,0,0,0.78);backdrop-filter:blur(2px)}
+.founders-sec{background:rgba(8,8,8,0.82);backdrop-filter:blur(2px)}
+.cta-sec{background:rgba(0,0,0,0.8);backdrop-filter:blur(2px);text-align:center;padding:8rem 3rem;border-top:1px solid var(--border)}
+
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:1rem;overflow:hidden;margin-top:3.5rem}
+.svc-card{background:rgba(8,8,8,0.9);padding:2.5rem;cursor:pointer;transition:background 0.25s;position:relative;overflow:hidden}
+.svc-card:hover{background:rgba(17,17,17,0.95)}
+.svc-card::after{content:'→';position:absolute;right:1.5rem;bottom:1.5rem;font-size:1.2rem;color:var(--gold);opacity:0;transform:translateX(-8px);transition:opacity 0.2s,transform 0.2s}
+.svc-card:hover::after{opacity:1;transform:translateX(0)}
+.svc-icon{width:42px;height:42px;border-radius:10px;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem}
+.svc-icon svg{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.svc-name{font-family:var(--fh);font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:0.65rem}
+.svc-desc{font-size:0.875rem;color:var(--text2);line-height:1.75;font-weight:300}
+.svc-tags{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:1.25rem}
+.svc-tag{font-size:0.68rem;padding:0.28rem 0.7rem;border-radius:2rem;border:1px solid var(--border2);color:var(--text3)}
+
+.process-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;margin-top:4rem}
+.pstep .pnum{font-family:var(--fh);font-size:3.5rem;font-weight:800;color:rgba(255,255,255,0.06);line-height:1;margin-bottom:1rem}
+.pstep .ptitle{font-family:var(--fh);font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:0.5rem}
+.pstep .pdesc{font-size:0.85rem;color:var(--text2);line-height:1.75;font-weight:300}
+
+.founders-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;margin-top:3.5rem}
+.founder-card{border:1px solid var(--border);border-radius:1rem;padding:2.5rem;background:rgba(17,17,17,0.92);transition:border-color 0.25s,transform 0.3s}
+.founder-card:hover{border-color:var(--gold);transform:translateY(-4px)}
+.founder-avatar{width:72px;height:72px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:1.4rem;font-weight:700;color:var(--gold);background:var(--gold3);margin-bottom:1.5rem}
+.founder-name{font-family:var(--fh);font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:0.3rem}
+.founder-role{font-size:0.78rem;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase;font-weight:500;margin-bottom:1rem}
+.founder-bio{font-size:0.875rem;color:var(--text2);line-height:1.75;font-weight:300}
+.founder-divider{width:32px;height:1px;background:var(--border2);margin:1.25rem 0}
+
+.contact-form{display:grid;grid-template-columns:1fr;gap:1rem;margin-bottom:2rem;max-width:500px;margin-left:auto;margin-right:auto}
+.form-group{display:flex;flex-direction:column}
+.form-group label{font-size:0.875rem;color:var(--text2);margin-bottom:0.5rem;font-weight:500}
+.form-group input,.form-group textarea{background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:0.5rem;padding:0.75rem;color:var(--text);font-family:var(--fb);font-size:0.875rem;transition:border-color 0.2s;outline:none}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--gold)}
+.form-group textarea{resize:vertical;min-height:100px}
+
+footer{background:rgba(8,8,8,0.95);border-top:1px solid var(--border);padding:2.5rem 3rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;position:relative;z-index:1}
+.footer-logo{display:flex;align-items:center;gap:0.6rem}
+.footer-logo-img{width:24px;height:24px;object-fit:contain;filter:brightness(0) invert(1);opacity:0.6}
+.footer-logo-text{font-family:var(--fh);font-size:1.1rem;font-weight:800;color:var(--text)}
+.footer-logo-text span{color:var(--gold)}
+footer p{font-size:0.78rem;color:var(--text3)}
+.footer-links{display:flex;gap:1.5rem}
+.footer-links a{font-size:0.78rem;color:var(--text3);text-decoration:none;cursor:pointer;transition:color 0.2s}
+.footer-links a:hover{color:var(--gold)}
+
+.pricing-hero{padding:8rem 3rem 4rem;text-align:center;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.8);backdrop-filter:blur(4px)}
+.pricing-hero .stag{justify-content:center}
+.pkg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;margin-top:3.5rem}
+.pkg-card{border:1px solid var(--border);border-radius:1rem;padding:2rem;background:rgba(17,17,17,0.92);position:relative;transition:border-color 0.3s,transform 0.3s}
+.pkg-card:hover{border-color:var(--border2);transform:translateY(-4px)}
+.pkg-card.featured{border-color:var(--gold)}
+.pkg-badge{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.3rem 1rem;border-radius:0 0 0.75rem 0.75rem}
+.pkg-name{font-family:var(--fh);font-size:1rem;font-weight:700;color:var(--text);margin-bottom:0.5rem}
+.pkg-price{font-family:var(--fh);font-size:2.25rem;font-weight:800;color:var(--text);margin:1rem 0 0.25rem;letter-spacing:-0.03em}
+.pkg-price sub{font-size:0.9rem;font-weight:400;color:var(--text2)}
+.pkg-desc{font-size:0.82rem;color:var(--text2);font-weight:300;line-height:1.7;margin-bottom:1.5rem}
+.pkg-divider{height:1px;background:var(--border);margin-bottom:1.5rem}
+.pkg-features{list-style:none;display:flex;flex-direction:column;gap:0.65rem;margin-bottom:2rem}
+.pkg-features li{font-size:0.82rem;color:var(--text2);display:flex;align-items:flex-start;gap:0.6rem;font-weight:300}
+.pkg-features li::before{content:'';width:14px;height:14px;border-radius:50%;border:1px solid var(--gold);flex-shrink:0;margin-top:2px;background:var(--gold3)}
+.pkg-btn{width:100%;padding:0.75rem;border-radius:2rem;font-family:var(--fb);font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;border:1px solid var(--border2);background:transparent;color:var(--text)}
+.pkg-btn:hover{border-color:var(--gold);color:var(--gold)}
+.pkg-card.featured .pkg-btn{background:var(--gold);color:#000;border-color:var(--gold)}
+.pkg-card.featured .pkg-btn:hover{opacity:0.85}
+.addon-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:3.5rem}
+.addon-card{border:1px solid var(--border);border-radius:0.75rem;padding:1.25rem 1.5rem;background:rgba(8,8,8,0.9);display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.addon-name{font-size:0.875rem;color:var(--text);font-weight:400}
+.addon-price{font-family:var(--fh);font-size:1rem;font-weight:700;color:var(--gold);white-space:nowrap}
+
+#page-web section,#page-video section,#page-ai section{background:rgba(0,0,0,0.8);backdrop-filter:blur(2px)}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.6s cubic-bezier(0.16,1,0.3,1),transform 0.6s cubic-bezier(0.16,1,0.3,1)}
+.reveal.visible{opacity:1;transform:none}
+
+.section-3d-divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0.3;position:relative;z-index:1}
+
+.ticker-wrap{overflow:hidden;white-space:nowrap;padding:1rem 0;background:rgba(201,169,110,0.06);border-top:1px solid rgba(201,169,110,0.12);border-bottom:1px solid rgba(201,169,110,0.12);position:relative;z-index:1}
+.ticker-inner{display:inline-flex;animation:ticker 24s linear infinite}
+.ticker-item{font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);padding:0 2.5rem;opacity:0.6}
+.ticker-sep{color:var(--gold);opacity:0.3;padding:0 0.5rem}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem;flex-wrap:wrap;gap:1rem}
+  .nav-logo{flex:1 1 auto}
+  .nav-links{flex-wrap:wrap;justify-content:center;width:100%;gap:0.75rem;margin-top:0.75rem}
+  .nav-links li{flex:1 1 auto;text-align:center}
+  .nav-links a{font-size:0.75rem}
+  .hero{padding:5rem 1.5rem 3rem}
+  .hero-title{font-size:clamp(2.5rem,10vw,5rem)}
+  .hero-desc{font-size:1rem;margin-bottom:2rem}
+  .hero-btns{flex-direction:column;align-items:flex-start}
+  .hero-stats{flex-direction:column;gap:1.5rem;margin-top:3rem}
+  .hero-bg-word{display:none}
+  section{padding:4rem 1.5rem}
+  .svc-grid{grid-template-columns:1fr}
+  .process-grid{grid-template-columns:1fr;gap:1.5rem}
+  .founders-grid{grid-template-columns:1fr}
+  footer{flex-direction:column;text-align:center;padding:2rem 1.5rem}
+  .footer-links{justify-content:center;margin-top:1rem}
+  .pricing-hero{padding:6rem 1.5rem 3rem}
+  .pkg-grid{grid-template-columns:1fr}
+  .cta-sec{padding:6rem 1.5rem}
+}
+@media(max-width:480px){
+  .hero-title{font-size:clamp(2rem,12vw,4rem)}
+  .btn-gold,.btn-ghost{padding:0.7rem 1.5rem;font-size:0.8rem}
+  section{padding:3rem 1rem}
+}
+</style>
+</head>
+<body>
+
+<canvas id="three-canvas"></canvas>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active">
+  <nav>
+    <ul class="nav-links">
+      <li><a onclick="scrollToId('svc')">Services</a></li>
+      <li><a onclick="scrollToId('proc')">Process</a></li>
+      <li><a onclick="scrollToId('founders')">Team</a></li>
+      <li><a onclick="scrollToId('cta')" class="nav-cta">Let's Talk</a></li>
+    </ul>
+    <div class="nav-logo" onclick="goHome()">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='34'%3E%3Ctext x='0' y='26' font-family='Helvetica,Arial,sans-serif' font-size='24' fill='%23c9a96e'%3EVyut%3C/text%3E%3C/svg%3E" class="logo-img" alt="Vyut logo">
+      <span class="logo-text">Vyut<span>.</span></span>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="grid-bg"></div>
+    <div class="orbit-wrap">
+      <div class="orbit orbit-1"><div class="orbit-dot"></div></div>
+      <div class="orbit orbit-2"><div class="orbit-dot-sm"></div></div>
+      <div class="orbit orbit-3"><div class="orbit-dot"></div></div>
+      <div class="orbit-center"><div class="orbit-center-dot"></div></div>
+    </div>
+    <div class="hero-eyebrow">Jodhpur's Digital World</div>
+    <h1 class="hero-title">We build brands<br><span class="dim">that move.</span></h1>
+    <p class="hero-desc">Vyut is a full-service digital agency delivering world-class web design, cinematic motion, and intelligent AI automation.</p>
+    <div class="hero-btns">
+      <button class="btn-gold" onclick="scrollToId('cta')">Start a project →</button>
+      <button class="btn-ghost" onclick="scrollToId('svc')">Our services</button>
+    </div>
+    <div class="hero-stats">
+      <div><div class="stat-n">40<em>+</em></div><div class="stat-l">Projects delivered</div></div>
+      <div><div class="stat-n">3</div><div class="stat-l">Core services</div></div>
+      <div><div class="stat-n">100<em>%</em></div><div class="stat-l">Client satisfaction</div></div>
+    </div>
+    <div class="hero-bg-word">Vyut</div>
+  </section>
+
+  <div class="ticker-wrap">
+    <div class="ticker-inner">
+      <span class="ticker-item">Web Design</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">Video Production</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">AI Automation</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">Motion Design</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">E-commerce</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">Brand Films</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">Chatbots</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">Jodhpur</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">Web Design</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">Video Production</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">AI Automation</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">Motion Design</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">E-commerce</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">Brand Films</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">Chatbots</span><span class="ticker-sep">✦</span>
+      <span class="ticker-item">Jodhpur</span><span class="ticker-sep">✦</span>
+    </div>
+  </div>
+
+  <div class="section-3d-divider"></div>
+
+  <section class="services-sec" id="svc">
+    <div class="stag">What we do</div>
+    <h2 class="stitle">Three disciplines.<br>One vision.</h2>
+    <p class="ssub">Click any service to explore our packages and transparent pricing.</p>
+    <div class="svc-grid reveal">
+      <div class="svc-card" onclick="openService('web')">
+        <div class="svc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+        <div class="svc-name">Web Design & Development</div>
+        <p class="svc-desc">Fast, beautiful websites and web apps built to convert — from landing pages to full-stack platforms.</p>
+        <div class="svc-tags"><span class="svc-tag">Landing pages</span><span class="svc-tag">Business sites</span><span class="svc-tag">E-commerce</span><span class="svc-tag">Web apps</span></div>
+      </div>
+      <div class="svc-card" onclick="openService('video')">
+        <div class="svc-icon"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
+        <div class="svc-name">Video & Motion Design</div>
+        <p class="svc-desc">Cinematic brand films, reels, and motion graphics that make people stop scrolling and start watching.</p>
+        <div class="svc-tags"><span class="svc-tag">Brand films</span><span class="svc-tag">Reels</span><span class="svc-tag">Motion graphics</span><span class="svc-tag">Ad creatives</span></div>
+      </div>
+      <div class="svc-card" onclick="openService('ai')">
+        <div class="svc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg></div>
+        <div class="svc-name">AI Automation</div>
+        <p class="svc-desc">Custom AI workflows that save time, cut costs, and scale your business — without extra staff.</p>
+        <div class="svc-tags"><span class="svc-tag">Chatbots</span><span class="svc-tag">WhatsApp bots</span><span class="svc-tag">Lead automation</span><span class="svc-tag">AI integrations</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-3d-divider"></div>
+
+  <section id="proc">
+    <div class="stag reveal">How we work</div>
+    <h2 class="stitle reveal">Simple process.<br>Serious results.</h2>
+    <p class="ssub reveal">Lean, focused, and always on time.</p>
+    <div class="process-grid reveal">
+      <div class="pstep"><div class="pnum">01</div><div class="ptitle">Discovery</div><p class="pdesc">We understand your business, audience, and goals in one focused call.</p></div>
+      <div class="pstep"><div class="pnum">02</div><div class="ptitle">Strategy</div><p class="pdesc">We map out the solution — design, tech, content — before a single pixel is placed.</p></div>
+      <div class="pstep"><div class="pnum">03</div><div class="ptitle">Execution</div><p class="pdesc">We build fast with regular updates. You see progress every step, no surprises.</p></div>
+      <div class="pstep"><div class="pnum">04</div><div class="ptitle">Launch & Grow</div><p class="pdesc">On-time delivery, then ongoing support through retainers and new campaigns.</p></div>
+    </div>
+  </section>
+
+  <div class="section-3d-divider"></div>
+
+  <section class="founders-sec" id="founders">
+    <div class="stag reveal">The team</div>
+    <h2 class="stitle reveal">Built by founders<br>who create.</h2>
+    <p class="ssub reveal">Vyut was built from Jodhpur with a clear mission — bring world-class digital work to local businesses.</p>
+    <div class="founders-grid">
+      <div class="founder-card reveal">
+        <div class="founder-avatar">RS</div>
+        <div class="founder-name">Raghvendra Singh Rathore</div>
+        <div class="founder-role">Co-Founder & Creative Director</div>
+        <div class="founder-divider"></div>
+        <p class="founder-bio">Leads brand strategy, visual direction, and motion design. Passionate about creating digital experiences that leave a lasting impression.</p>
+      </div>
+      <div class="founder-card reveal">
+        <div class="founder-avatar">PS</div>
+        <div class="founder-name">Pradhuman Singh Shekhawat</div>
+        <div class="founder-role">Co-Founder & Tech Lead</div>
+        <div class="founder-divider"></div>
+        <p class="founder-bio">Drives web development and AI automation. Builds intelligent, high-performance systems that help businesses work smarter and grow faster.</p>
+      </div>
+      <div class="founder-card reveal">
+        <div class="founder-avatar">HB</div>
+        <div class="founder-name">Harshit Borana</div>
+        <div class="founder-role">Co-Founder & Growth Strategist</div>
+        <div class="founder-divider"></div>
+        <p class="founder-bio">Drives business development, client relationships, and growth strategy. Committed to connecting Jodhpur's businesses with impactful digital solutions.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-3d-divider"></div>
+
+  <section class="cta-sec" id="cta">
+    <div class="stag" style="justify-content:center">Get in touch</div>
+    <h2 class="stitle reveal" style="max-width:600px;margin:0 auto 1rem">Ready to build<br>something great?</h2>
+    <p class="ssub reveal" style="margin:0 auto 2rem">Tell us about your project and we'll respond within 24 hours. Based in Jodhpur, working pan-India.</p>
+    <div class="contact-form reveal">
+      <div class="form-group"><label>Full Name *</label><input type="text" id="contactName" placeholder="Your name"></div>
+      <div class="form-group"><label>Business / Brand Name *</label><input type="text" id="contactBusiness" placeholder="Your business"></div>
+      <div class="form-group"><label>Service Needed *</label><input type="text" id="contactService" placeholder="e.g., Web Design, Video, AI Automation"></div>
+      <div class="form-group"><label>Budget</label><input type="text" id="contactBudget" placeholder="e.g., ₹10,000 - ₹50,000"></div>
+      <div class="form-group"><label>Message</label><textarea id="contactMessage" placeholder="Tell us more about your project..."></textarea></div>
+    </div>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:2rem" class="reveal">
+      <button class="btn-gold" onclick="sendWhatsApp()">Start on WhatsApp →</button>
+      <button class="btn-ghost" onclick="sendEmail()">Send an email</button>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">
+      <span class="footer-logo-text">Vyut<span>.</span></span>
+    </div>
+    <p>© 2025 Vyut Digital Studio · Jodhpur, Rajasthan</p>
+    <div>
+      <p style="font-size:0.78rem;color:var(--text3)">+91 81188 95016 · +91 70238 45844 · +91 63675 55638</p>
+    </div>
+    <div class="footer-links">
+      <a onclick="scrollToId('svc')">Services</a>
+      <a onclick="scrollToId('founders')">Team</a>
+      <a onclick="scrollToId('cta')">Contact</a>
+    </div>
+  </footer>
+</div>
+
+<!-- WEB PAGE -->
+<div id="page-web" class="page">
+  <nav>
+    <div class="nav-logo" onclick="goHome()"><span class="logo-text">Vyut<span>.</span></span></div>
+    <ul class="nav-links"><li><a onclick="scrollToId('svc')">Services</a></li><li><a onclick="scrollToId('cta')" class="nav-cta">Let's Talk</a></li></ul>
+  </nav>
+  <div class="pricing-hero">
+    <div class="stag" style="justify-content:center">Web Design & Development</div>
+    <h1 class="stitle" style="max-width:600px;margin:0 auto 1rem">Websites that work<br>as hard as you do.</h1>
+    <p class="ssub" style="margin:0 auto">Every package includes mobile-responsive design, SEO setup, and fast loading. No hidden charges.</p>
+  </div>
+  <section style="padding:4rem 3rem">
+    <div class="pkg-grid">
+      <div class="pkg-card"><div class="pkg-name">Starter</div><div class="pkg-price">₹3,980 <sub>one-time</sub></div><p class="pkg-desc">Perfect for new businesses needing a clean, professional web presence fast.</p><div class="pkg-divider"></div><ul class="pkg-features"><li>Up to 5 pages</li><li>Mobile responsive design</li><li>Contact form + WhatsApp button</li><li>Basic SEO setup</li><li>Google Maps integration</li><li>1 round of revisions</li><li>Delivery in 7 days</li></ul><button class="pkg-btn" onclick="contactPlan('Starter - Web Design')">Get started →</button></div>
+      <div class="pkg-card featured"><div class="pkg-badge">Most Popular</div><div class="pkg-name">Growth</div><div class="pkg-price">₹5,550 <sub>one-time</sub></div><p class="pkg-desc">For established businesses that want a premium site with advanced features.</p><div class="pkg-divider"></div><ul class="pkg-features"><li>Up to 12 pages</li><li>Custom UI/UX design</li><li>Animations & interactions</li><li>Blog / CMS integration</li><li>Advanced SEO + sitemap</li><li>Google Analytics setup</li><li>3 rounds of revisions</li><li>Delivery in 14 days</li></ul><button class="pkg-btn" onclick="contactPlan('Growth - Web Design')">Get started →</button></div>
+      <div class="pkg-card"><div class="pkg-name">Premium</div><div class="pkg-price">₹8,990 <sub>one-time</sub></div><p class="pkg-desc">Full-scale web presence with e-commerce, booking systems, or custom web apps.</p><div class="pkg-divider"></div><ul class="pkg-features"><li>Unlimited pages</li><li>E-commerce / booking system</li><li>Custom backend / dashboard</li><li>Payment gateway integration</li><li>Performance optimisation</li><li>3 months free support</li><li>Unlimited revisions</li><li>Priority delivery</li></ul><button class="pkg-btn" onclick="contactPlan('Premium - Web Design')">Get started →</button></div>
+    </div>
+    <div style="margin-top:4rem"><div class="stag">Add-ons</div><h3 class="stitle" style="font-size:1.5rem">Enhance your package</h3><div class="addon-grid" style="margin-top:1.5rem"><div class="addon-card"><span class="addon-name">Logo design</span><span class="addon-price">₹2,999</span></div><div class="addon-card"><span class="addon-name">WhatsApp chatbot</span><span class="addon-price">₹4,999</span></div><div class="addon-card"><span class="addon-name">Monthly maintenance</span><span class="addon-price">₹1,499/mo</span></div><div class="addon-card"><span class="addon-name">Domain + hosting setup</span><span class="addon-price">₹1,999/yr</span></div><div class="addon-card"><span class="addon-name">Social media pages setup</span><span class="addon-price">₹1,499</span></div><div class="addon-card"><span class="addon-name">Extra revision round</span><span class="addon-price">₹999</span></div></div></div>
+  </section>
+  <footer><div class="footer-logo"><span class="footer-logo-text">Vyut<span>.</span></span></div><p>© 2025 Vyut Digital Studio · Jodhpur</p><div class="footer-links"><a onclick="goHome()">Home</a><a onclick="openService('video')">Video</a><a onclick="openService('ai')">AI</a></div></footer>
+</div>
+
+<!-- VIDEO PAGE -->
+<div id="page-video" class="page">
+  <nav>
+    <div class="nav-logo" onclick="goHome()"><span class="logo-text">Vyut<span>.</span></span></div>
+    <ul class="nav-links"><li><a onclick="scrollToId('svc')">Services</a></li><li><a onclick="scrollToId('cta')" class="nav-cta">Let's Talk</a></li></ul>
+  </nav>
+  <div class="pricing-hero">
+    <div class="stag" style="justify-content:center">Video & Motion Design</div>
+    <h1 class="stitle" style="max-width:600px;margin:0 auto 1rem">Content that stops<br>the scroll.</h1>
+    <p class="ssub" style="margin:0 auto">Cinematic production, motion graphics, and social-ready reels — built for Jodhpur businesses and beyond.</p>
+  </div>
+  <section style="padding:4rem 3rem">
+    <div class="pkg-grid">
+      <div class="pkg-card"><div class="pkg-name">Social Reels</div><div class="pkg-price">₹499-999 <sub>per reel</sub></div><p class="pkg-desc">Short-form vertical reels for Instagram, YouTube Shorts, and Facebook.</p><div class="pkg-divider"></div><ul class="pkg-features"><li>Up to 60 seconds</li><li>Professional colour grade</li><li>Text animations & captions</li><li>Background music (licensed)</li><li>1 round of revisions</li><li>Delivery in 3 days</li></ul><button class="pkg-btn" onclick="contactPlan('Social Reels - Video Design')">Get started →</button></div>
+      <div class="pkg-card featured"><div class="pkg-badge">Best Value</div><div class="pkg-name">Brand Film</div><div class="pkg-price">₹4,850 <sub>one-time</sub></div><p class="pkg-desc">A cinematic brand story video that introduces your business with impact.</p><div class="pkg-divider"></div><ul class="pkg-features"><li>1–3 minute brand film</li><li>Script consultation</li><li>Professional colour grade</li><li>Motion graphics & titles</li><li>Custom music / voiceover</li><li>2 rounds of revisions</li><li>Delivery in 10 days</li><li>Horizontal + vertical cuts</li></ul><button class="pkg-btn" onclick="contactPlan('Brand Film - Video Design')">Get started →</button></div>
+      <div class="pkg-card"><div class="pkg-name">Monthly Content</div><div class="pkg-price">₹8,749 <sub>/month</sub></div><p class="pkg-desc">Consistent, high-quality video content every month to keep your brand growing.</p><div class="pkg-divider"></div><ul class="pkg-features"><li>8 reels per month</li><li>2 long-form videos</li><li>Social media scheduling</li><li>Monthly content strategy call</li><li>Custom thumbnails</li><li>Unlimited minor edits</li></ul><button class="pkg-btn" onclick="contactPlan('Monthly Content - Video Design')">Get started →</button></div>
+    </div>
+    <div style="margin-top:4rem"><div class="stag">Add-ons</div><h3 class="stitle" style="font-size:1.5rem">Enhance your content</h3><div class="addon-grid" style="margin-top:1.5rem"><div class="addon-card"><span class="addon-name">Voiceover (Hindi/English)</span><span class="addon-price">₹1,499</span></div><div class="addon-card"><span class="addon-name">Motion logo animation</span><span class="addon-price">₹2,999</span></div><div class="addon-card"><span class="addon-name">Ad creative set (5 variants)</span><span class="addon-price">₹4,999</span></div><div class="addon-card"><span class="addon-name">YouTube banner + thumbnail</span><span class="addon-price">₹1,999</span></div><div class="addon-card"><span class="addon-name">Extra revision round</span><span class="addon-price">₹799</span></div><div class="addon-card"><span class="addon-name">Rush delivery (24hr)</span><span class="addon-price">₹1,999</span></div></div></div>
+  </section>
+  <footer><div class="footer-logo"><span class="footer-logo-text">Vyut<span>.</span></span></div><p>© 2025 Vyut Digital Studio · Jodhpur</p><div class="footer-links"><a onclick="goHome()">Home</a><a onclick="openService('web')">Web</a><a onclick="openService('ai')">AI</a></div></footer>
+</div>
+
+<!-- AI PAGE -->
+<div id="page-ai" class="page">
+  <nav>
+    <div class="nav-logo" onclick="goHome()"><span class="logo-text">Vyut<span>.</span></span></div>
+    <ul class="nav-links"><li><a onclick="scrollToId('svc')">Services</a></li><li><a onclick="scrollToId('cta')" class="nav-cta">Let's Talk</a></li></ul>
+  </nav>
+  <div class="pricing-hero">
+    <div class="stag" style="justify-content:center">AI Automation</div>
+    <h1 class="stitle" style="max-width:600px;margin:0 auto 1rem">Work smarter.<br>Grow faster.</h1>
+    <p class="ssub" style="margin:0 auto">Custom AI systems that automate your sales, support, and operations.</p>
+  </div>
+  <section style="padding:4rem 3rem">
+    <div class="pkg-grid">
+      <div class="pkg-card"><div class="pkg-name">Starter Bot</div><div class="pkg-price">₹6,999 <sub>one-time</sub></div><p class="pkg-desc">A simple WhatsApp or website chatbot to handle FAQs and basic queries automatically.</p><div class="pkg-divider"></div><ul class="pkg-features"><li>WhatsApp or website chatbot</li><li>Up to 20 FAQ responses</li><li>Lead capture + notification</li><li>Basic flow builder</li><li>1 month free support</li><li>Delivery in 5 days</li></ul><button class="pkg-btn" onclick="contactPlan('Starter Bot - AI Automation')">Get started →</button></div>
+      <div class="pkg-card featured"><div class="pkg-badge">Most Popular</div><div class="pkg-name">Business Automation</div><div class="pkg-price">₹19,999 <sub>one-time</sub></div><p class="pkg-desc">A complete automation system covering lead gen, follow-ups, booking, and support.</p><div class="pkg-divider"></div><ul class="pkg-features"><li>WhatsApp + website bot</li><li>CRM integration</li><li>Automated follow-up sequences</li><li>Appointment / booking system</li><li>Lead scoring & routing</li><li>Analytics dashboard</li><li>3 months free support</li><li>Delivery in 14 days</li></ul><button class="pkg-btn" onclick="contactPlan('Business Automation - AI Automation')">Get started →</button></div>
+      <div class="pkg-card"><div class="pkg-name">Enterprise AI</div><div class="pkg-price">₹49,999<span style="font-size:1rem;color:var(--text2);font-weight:300"> +</span></div><p class="pkg-desc">End-to-end AI infrastructure — custom models, deep integrations, and ongoing optimisation.</p><div class="pkg-divider"></div><ul class="pkg-features"><li>Custom AI model / agent</li><li>Full business process automation</li><li>ERP / inventory integration</li><li>Multi-channel (WA, Email, Web)</li><li>Staff training session</li><li>6 months dedicated support</li><li>Monthly performance review</li></ul><button class="pkg-btn" onclick="contactPlan('Enterprise AI - Custom Quote')">Get a custom quote →</button></div>
+    </div>
+    <div style="margin-top:4rem"><div class="stag">Add-ons</div><h3 class="stitle" style="font-size:1.5rem">Extend your automation</h3><div class="addon-grid" style="margin-top:1.5rem"><div class="addon-card"><span class="addon-name">Instagram DM automation</span><span class="addon-price">₹3,999</span></div><div class="addon-card"><span class="addon-name">Google Sheets integration</span><span class="addon-price">₹1,999</span></div><div class="addon-card"><span class="addon-name">Email drip campaign setup</span><span class="addon-price">₹4,999</span></div><div class="addon-card"><span class="addon-name">Monthly bot maintenance</span><span class="addon-price">₹999/mo</span></div><div class="addon-card"><span class="addon-name">Payment automation</span><span class="addon-price">₹2,999</span></div><div class="addon-card"><span class="addon-name">Custom AI training data</span><span class="addon-price">₹5,999</span></div></div></div>
+  </section>
+  <footer><div class="footer-logo"><span class="footer-logo-text">Vyut<span>.</span></span></div><p>© 2025 Vyut Digital Studio · Jodhpur</p><div class="footer-links"><a onclick="goHome()">Home</a><a onclick="openService('web')">Web</a><a onclick="openService('video')">Video</a></div></footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ══════════════ RENDERER SETUP ══════════════ */
+  const canvas = document.getElementById('three-canvas');
+  const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 500);
+  camera.position.z = 8;
+
+  /* ══════════════ CONSTANTS ══════════════ */
+  const GOLD   = 0xc9a96e;
+  const GOLD2  = 0xddb87a;
+  const BLUE   = 0x3a6fd8;
+  const PURPLE = 0x8844cc;
+  const CYAN   = 0x44aacc;
+  const RED    = 0xcc4444;
+  const WHITE  = 0xffffff;
+
+  /* ══════════════ LIGHTS ══════════════ */
+  scene.add(new THREE.AmbientLight(0x0a0812, 3));
+
+  const sunLight = new THREE.PointLight(GOLD, 4, 40);
+  sunLight.position.set(6, 4, 4);
+  scene.add(sunLight);
+
+  const blueLight = new THREE.PointLight(0x2244ff, 2, 30);
+  blueLight.position.set(-6, -3, 3);
+  scene.add(blueLight);
+
+  const purpleLight = new THREE.PointLight(PURPLE, 1.5, 25);
+  purpleLight.position.set(0, 8, 2);
+  scene.add(purpleLight);
+
+  const rimLight = new THREE.PointLight(CYAN, 1.2, 20);
+  rimLight.position.set(-8, 0, -2);
+  scene.add(rimLight);
+
+  /* ══════════════ MATERIAL HELPERS ══════════════ */
+  function matPhong(color, opts={}){
+    return new THREE.MeshPhongMaterial({
+      color, transparent:true,
+      opacity: opts.opacity||0.55,
+      shininess: opts.shininess||60,
+      specular: opts.specular||0xffffff,
+      emissive: opts.emissive||color,
+      emissiveIntensity: opts.emissiveInt||0.05,
+      side: opts.side||THREE.FrontSide
+    });
+  }
+  function matBasic(color, opts={}){
+    return new THREE.MeshBasicMaterial({
+      color, transparent:true,
+      opacity: opts.opacity||0.5,
+      wireframe: opts.wireframe||false
+    });
+  }
+  function matLine(color, opacity=0.6){
+    return new THREE.LineBasicMaterial({color, transparent:true, opacity});
+  }
+
+  /* ══════════════ SCENE GROUPS ══════════════ */
+  const universeGroup = new THREE.Group();
+  scene.add(universeGroup);
+
+  /* ══════════════ 1. MILKY WAY GALAXY CORE ══════════════ */
+  function createGalaxy(radius, arms, starsPerArm, spread, cx, cy, cz, color1, color2){
+    const geo = new THREE.BufferGeometry();
+    const count = arms * starsPerArm;
+    const pos = new Float32Array(count*3);
+    const colors = new Float32Array(count*3);
+    const c1 = new THREE.Color(color1);
+    const c2 = new THREE.Color(color2);
+
+    for(let arm=0; arm<arms; arm++){
+      for(let i=0; i<starsPerArm; i++){
+        const idx = (arm*starsPerArm+i)*3;
+        const t = i/starsPerArm;
+        const angle = (arm/arms)*Math.PI*2 + t*Math.PI*4;
+        const r = t*radius + (Math.random()-0.5)*spread;
+        pos[idx]   = Math.cos(angle)*r + (Math.random()-0.5)*spread*0.6 + cx;
+        pos[idx+1] = (Math.random()-0.5)*spread*0.25 + cy;
+        pos[idx+2] = Math.sin(angle)*r + (Math.random()-0.5)*spread*0.6 + cz;
+        const mixT = Math.random();
+        const c = c1.clone().lerp(c2, mixT*(1-t)+0.2);
+        colors[idx]=c.r; colors[idx+1]=c.g; colors[idx+2]=c.b;
+      }
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
+    const mat = new THREE.PointsMaterial({
+      size:0.04, vertexColors:true,
+      transparent:true, opacity:0.85,
+      sizeAttenuation:true
+    });
+    return new THREE.Points(geo, mat);
+  }
+
+  const galaxy1 = createGalaxy(5, 4, 1800, 0.8, 2, 0, -8, 0xc9a96e, 0x8888ff);
+  universeGroup.add(galaxy1);
+
+  const galaxy2 = createGalaxy(4, 3, 1200, 0.6, -3, -10, -9, 0x6688ff, 0xcc44aa);
+  universeGroup.add(galaxy2);
+
+  const galaxy3 = createGalaxy(3, 2, 800, 0.5, 4, -18, -7, 0x44ccaa, 0xffd466);
+  universeGroup.add(galaxy3);
+
+  /* ══════════════ 2. DEEP STAR FIELD ══════════════ */
+  function makeStarField(count, spread, zRange, size, opacity, color){
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array(count*3);
+    for(let i=0;i<count;i++){
+      pos[i*3]   = (Math.random()-0.5)*spread*2;
+      pos[i*3+1] = (Math.random()-0.5)*spread;
+      pos[i*3+2] = -Math.random()*zRange - 2;
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    return new THREE.Points(geo, new THREE.PointsMaterial({
+      color, size, transparent:true, opacity, sizeAttenuation:true
+    }));
+  }
+
+  const starLayers = [
+    makeStarField(3000, 60, 80, 0.020, 0.9, WHITE),
+    makeStarField(2000, 50, 60, 0.035, 0.65, 0xffeedd),
+    makeStarField(1000, 40, 40, 0.055, 0.45, 0xaaddff),
+    makeStarField(500,  30, 20, 0.075, 0.30, GOLD),
+  ];
+  starLayers.forEach(l=>universeGroup.add(l));
+
+  /* ══════════════ 3. NEBULA CLOUDS ══════════════ */
+  function makeNebula(x, y, z, color, size, opacity){
+    const canvas2 = document.createElement('canvas');
+    canvas2.width = canvas2.height = 256;
+    const ctx = canvas2.getContext('2d');
+    const gradient = ctx.createRadialGradient(128,128,0,128,128,128);
+    const c = new THREE.Color(color);
+    gradient.addColorStop(0, `rgba(${Math.round(c.r*255)},${Math.round(c.g*255)},${Math.round(c.b*255)},0.6)`);
+    gradient.addColorStop(0.4, `rgba(${Math.round(c.r*255)},${Math.round(c.g*255)},${Math.round(c.b*255)},0.15)`);
+    gradient.addColorStop(1, `rgba(0,0,0,0)`);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0,0,256,256);
+    const tex = new THREE.CanvasTexture(canvas2);
+    const mat = new THREE.SpriteMaterial({map:tex,transparent:true,opacity,depthWrite:false,blending:THREE.AdditiveBlending});
+    const sprite = new THREE.Sprite(mat);
+    sprite.position.set(x,y,z);
+    sprite.scale.set(size,size,1);
+    return sprite;
+  }
+
+  const nebulae = [
+    makeNebula(4, 2, -12, 0x3344ff, 18, 0.25),
+    makeNebula(-5, 0, -14, 0xcc2266, 22, 0.20),
+    makeNebula(0, -8, -11, 0x2288cc, 16, 0.22),
+    makeNebula(6, -12, -13, 0x44cc88, 14, 0.18),
+    makeNebula(-4, -18, -12, 0x8844ff, 20, 0.20),
+    makeNebula(2, -22, -13, 0xff6633, 15, 0.16),
+    makeNebula(-8, 4, -15, 0x66aaff, 24, 0.14),
+    makeNebula(8, -5, -13, 0xffaa33, 12, 0.18),
+  ];
+  nebulae.forEach(n=>universeGroup.add(n));
+
+  /* ══════════════ 4. RINGED PLANETS ══════════════ */
+  function createRingedPlanet(x, y, z, radius, ringInner, ringOuter, planetColor, ringColor, tiltX, tiltZ){
+    const group = new THREE.Group();
+    const planetGeo = new THREE.SphereGeometry(radius, 32, 32);
+    const planetMat = matPhong(planetColor, {opacity:1, shininess:80, emissiveInt:0.12});
+    const planet = new THREE.Mesh(planetGeo, planetMat);
+    group.add(planet);
+    for(let ri=0; ri<5; ri++){
+      const rInner = ringInner + ri*(ringOuter-ringInner)/5 * 0.85;
+      const rOuter = ringInner + (ri+1)*(ringOuter-ringInner)/5 * 0.85;
+      const ringGeo = new THREE.RingGeometry(rInner, rOuter, 64);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: ringColor, side:THREE.DoubleSide,
+        transparent:true, opacity:0.15 + ri*0.04,
+        blending:THREE.AdditiveBlending
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = Math.PI/2;
+      group.add(ring);
+    }
+    const edgeGeo = new THREE.TorusGeometry((ringInner+ringOuter)/2, 0.015, 4, 80);
+    const edgeMat = new THREE.MeshBasicMaterial({color:GOLD,transparent:true,opacity:0.4});
+    const edgeTorus = new THREE.Mesh(edgeGeo, edgeMat);
+    group.add(edgeTorus);
+    group.rotation.x = tiltX;
+    group.rotation.z = tiltZ;
+    group.position.set(x,y,z);
+    return group;
+  }
+
+  const planet1 = createRingedPlanet(-4.5, 1.8, -5, 0.55, 0.85, 1.6, 0xd4a866, GOLD, 0.6, 0.2);
+  const planet2 = createRingedPlanet(5.2, -7, -6,  0.4,  0.65, 1.2, 0x7799cc, CYAN, -0.5, -0.3);
+  const planet3 = createRingedPlanet(-5, -16, -5,  0.5,  0.78, 1.4, 0xcc8844, 0xffaa55, 0.7, 0.1);
+  const planet4 = createRingedPlanet(4.8, -22, -6, 0.45, 0.70, 1.3, 0x8866bb, PURPLE, -0.4, 0.35);
+  universeGroup.add(planet1, planet2, planet3, planet4);
+
+  /* ══════════════ 5. GLOWING STARS ══════════════ */
+  function makeBrightStar(x, y, z, size, color){
+    const group = new THREE.Group();
+    const core = new THREE.Mesh(new THREE.SphereGeometry(size, 8, 8), new THREE.MeshBasicMaterial({color:WHITE}));
+    group.add(core);
+    const canv = document.createElement('canvas');
+    canv.width = canv.height = 64;
+    const ctx = canv.getContext('2d');
+    const g = ctx.createRadialGradient(32,32,0,32,32,32);
+    const c = new THREE.Color(color);
+    g.addColorStop(0, `rgba(${Math.round(c.r*255)},${Math.round(c.g*255)},${Math.round(c.b*255)},1)`);
+    g.addColorStop(0.3, `rgba(${Math.round(c.r*255)},${Math.round(c.g*255)},${Math.round(c.b*255)},0.3)`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,64,64);
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({
+      map:new THREE.CanvasTexture(canv), transparent:true, opacity:0.9,
+      blending:THREE.AdditiveBlending, depthWrite:false
+    }));
+    halo.scale.set(size*12, size*12, 1);
+    group.add(halo);
+    const spikeGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-size*8,0,0), new THREE.Vector3(size*8,0,0)]);
+    const spikeGeo2 = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-size*8,0), new THREE.Vector3(0,size*8,0)]);
+    group.add(new THREE.Line(spikeGeo, matLine(color, 0.25)));
+    group.add(new THREE.Line(spikeGeo2, matLine(color, 0.25)));
+    group.position.set(x,y,z);
+    return {group, halo, size, baseOpacity:0.9, phase:Math.random()*Math.PI*2};
+  }
+
+  const brightStars = [
+    makeBrightStar(3.2, 3.5, -4, 0.045, WHITE),
+    makeBrightStar(-2.8, 2.0, -5, 0.035, 0xaaddff),
+    makeBrightStar(5.5, 0.5, -4, 0.030, 0xffddaa),
+    makeBrightStar(-5.8, -1, -6, 0.040, WHITE),
+    makeBrightStar(1.5, -4, -5, 0.028, 0xaaffdd),
+    makeBrightStar(-3.5, -6, -5, 0.035, 0xffaadd),
+    makeBrightStar(4.2, -10, -4, 0.032, WHITE),
+    makeBrightStar(-4.8, -12, -5, 0.038, 0xddaaff),
+    makeBrightStar(2.5, -15, -4, 0.030, 0xffccaa),
+    makeBrightStar(-2, -20, -5, 0.036, WHITE),
+    makeBrightStar(6, -18, -4, 0.028, 0xaaddff),
+    makeBrightStar(-6, -25, -5, 0.042, GOLD),
+  ];
+  brightStars.forEach(s=>universeGroup.add(s.group));
+
+  /* ══════════════ 6. SHOOTING STARS ══════════════ */
+  const shootingStars = [];
+  const METEOR_COUNT = 12;
+
+  function createMeteor(){
+    const len = Math.random()*2 + 1;
+    const points = [new THREE.Vector3(0,0,0), new THREE.Vector3(-len, -len*0.3, 0)];
+    const geo = new THREE.BufferGeometry().setFromPoints(points);
+    const mat = new THREE.LineBasicMaterial({color:WHITE, transparent:true, opacity:0});
+    const line = new THREE.Line(geo, mat);
+    const x = (Math.random()-0.5)*28;
+    const y = Math.random()*12 + 4;
+    const z = -(Math.random()*8+2);
+    line.position.set(x,y,z);
+    line.rotation.z = Math.random()*0.5 - 0.25;
+    const speed = Math.random()*0.15 + 0.08;
+    const delay = Math.random()*15;
+    let active = false, life = 0;
+    universeGroup.add(line);
+    return {line, mat, speed, delay, active, life, maxLife:1.5+Math.random(), x, y, z};
+  }
+
+  for(let i=0;i<METEOR_COUNT;i++) shootingStars.push(createMeteor());
+
+  /* ══════════════ 7. GEOMETRIC POLYHEDRA ══════════════ */
+  const polyhedra = [];
+
+  function addPoly(geo, x, y, z, scrollF, opts={}){
+    const g = new THREE.Group();
+    g.add(new THREE.Mesh(geo, matPhong(opts.color||GOLD, {opacity:opts.solidOp||0.12, emissiveInt:0.08})));
+    const w = new THREE.Mesh(geo, matBasic(opts.color||GOLD, {opacity:opts.wireOp||0.35, wireframe:true}));
+    g.add(w);
+    try{
+      const eg = new THREE.EdgesGeometry(geo,12);
+      g.add(new THREE.LineSegments(eg, matLine(opts.color||GOLD, opts.edgeOp||0.65)));
+    }catch(e){}
+    g.position.set(x,y,z);
+    if(opts.scale) g.scale.setScalar(opts.scale);
+    universeGroup.add(g);
+    polyhedra.push({
+      g, baseX:x, baseY:y,
+      scrollFactor:scrollF,
+      floatSpeed: opts.fSpeed||(Math.random()*0.2+0.08),
+      floatAmp:   opts.fAmp||(Math.random()*0.18+0.1),
+      phase:      Math.random()*Math.PI*2,
+      rotX:       opts.rotX||(Math.random()*0.004+0.001),
+      rotY:       opts.rotY||(Math.random()*0.006+0.002),
+      rotZ:       (Math.random()-0.5)*0.002,
+    });
+    return g;
+  }
+
+  addPoly(new THREE.IcosahedronGeometry(1.0,0),  3.8, 0.5, -3.5, 0.5, {scale:0.85, fAmp:0.22, edgeOp:0.7, color:GOLD});
+  addPoly(new THREE.OctahedronGeometry(0.8,0),  -3.8,-0.3,-3,   0.4, {scale:0.9, fSpeed:0.18, color:CYAN, edgeOp:0.55});
+  addPoly(new THREE.TetrahedronGeometry(0.7,0),  2.5,-2.5,-2.5, 0.6, {scale:0.8, rotY:0.009, color:GOLD});
+  addPoly(new THREE.DodecahedronGeometry(0.75,0),-3.5,-4.5,-3,  0.38,{scale:0.95,fAmp:0.25, color:PURPLE});
+  addPoly(new THREE.IcosahedronGeometry(0.55,1), 3.5,-5.5,-3.5, 0.42,{scale:1.0, fSpeed:0.22,color:BLUE});
+  addPoly(new THREE.OctahedronGeometry(0.45,0),  0.8,-6,-4,     0.35,{scale:0.7, rotX:0.006, color:GOLD});
+  addPoly(new THREE.TetrahedronGeometry(0.9,0), -3.8,-9,-3,     0.30,{scale:0.75,fAmp:0.30, color:CYAN});
+  addPoly(new THREE.IcosahedronGeometry(0.5,0),  4.0,-10,-2.5,  0.33,{scale:1.0, rotX:0.005, color:PURPLE});
+  addPoly(new THREE.DodecahedronGeometry(0.65,0),3.5,-14,-3,    0.25,{scale:0.9, fSpeed:0.15,color:GOLD});
+  addPoly(new THREE.OctahedronGeometry(0.6,0),  -3.2,-15,-2.5, 0.28,{scale:0.85,rotY:0.007,color:BLUE});
+  addPoly(new THREE.IcosahedronGeometry(1.1,0),  0.5,-19,-4,    0.18,{scale:0.8, fAmp:0.35, color:GOLD});
+
+  /* ══════════════ 8. TORUS KNOTS ══════════════ */
+  const knots = [];
+  function addKnot(x,y,z,scrollF,r,tube,p,q,color,op){
+    const mesh = new THREE.Mesh(
+      new THREE.TorusKnotGeometry(r,tube,80,8,p,q),
+      new THREE.MeshPhongMaterial({color, wireframe:true, transparent:true, opacity:op, emissive:color, emissiveIntensity:0.1})
+    );
+    mesh.position.set(x,y,z);
+    universeGroup.add(mesh);
+    knots.push({mesh, baseX:x, baseY:y, scrollFactor:scrollF, phase:Math.random()*Math.PI*2, rotX:0.003, rotY:0.005});
+    return mesh;
+  }
+  addKnot(-2.5, 1.5,-3.5, 0.45, 0.6,0.07,2,3, GOLD,  0.35);
+  addKnot( 4.5,-7.0,-4.5, 0.35, 0.5,0.06,3,2, PURPLE,0.30);
+  addKnot(-4.0,-12,-3.5,  0.25, 0.65,0.065,2,5,CYAN, 0.28);
+
+  /* ══════════════ 9. CONSTELLATION NETWORK ══════════════ */
+  const constellationNodes = [];
+  for(let i=0;i<30;i++){
+    constellationNodes.push(new THREE.Vector3(
+      (Math.random()-0.5)*24,
+      (Math.random()-0.5)*50,
+      (Math.random()-0.5)*6-5
+    ));
+  }
+  const lineMat = matLine(0x2a2010, 0.18);
+  for(let i=0;i<constellationNodes.length;i++){
+    for(let j=i+1;j<constellationNodes.length;j++){
+      if(constellationNodes[i].distanceTo(constellationNodes[j]) < 8){
+        const lg = new THREE.BufferGeometry().setFromPoints([constellationNodes[i],constellationNodes[j]]);
+        universeGroup.add(new THREE.Line(lg, lineMat));
+      }
+    }
+  }
+
+  /* ══════════════ 10. DUST PARTICLES ══════════════ */
+  const DUST_COUNT = 800;
+  const dustPos = new Float32Array(DUST_COUNT*3);
+  const dustVel = new Float32Array(DUST_COUNT*3);
+  for(let i=0;i<DUST_COUNT;i++){
+    dustPos[i*3]   = (Math.random()-0.5)*30;
+    dustPos[i*3+1] = (Math.random()-0.5)*60;
+    dustPos[i*3+2] = (Math.random()-0.5)*12-4;
+    dustVel[i*3]   = (Math.random()-0.5)*0.004;
+    dustVel[i*3+1] = (Math.random()-0.5)*0.003;
+    dustVel[i*3+2] = 0;
+  }
+  const dustGeo = new THREE.BufferGeometry();
+  dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos,3));
+  const dustMesh = new THREE.Points(dustGeo, new THREE.PointsMaterial({color:GOLD, size:0.022, transparent:true, opacity:0.4, sizeAttenuation:true}));
+  universeGroup.add(dustMesh);
+
+  /* ══════════════ 11. LARGE COSMIC RINGS ══════════════ */
+  function cosmicRing(radius, tube, x, y, z, color, opacity, tilt){
+    const g = new THREE.Mesh(
+      new THREE.TorusGeometry(radius, tube, 4, 80),
+      new THREE.MeshBasicMaterial({color, transparent:true, opacity, blending:THREE.AdditiveBlending})
+    );
+    g.rotation.x = tilt;
+    g.position.set(x,y,z);
+    universeGroup.add(g);
+    return g;
+  }
+
+  const cRings = [
+    cosmicRing(4.0, 0.012, 0, 0, -10, GOLD, 0.15, 1.1),
+    cosmicRing(5.5, 0.008, 0, 0, -12, BLUE, 0.10, 0.8),
+    cosmicRing(3.2, 0.010, 0,-10,-11, PURPLE, 0.12, 0.5),
+    cosmicRing(6.0, 0.006, 0,-20,-13, CYAN, 0.09, 1.3),
+    cosmicRing(2.8, 0.015, 0,-8, -9, GOLD, 0.18, 2.0),
+  ];
+
+  /* ══════════════ 12. PULSAR / QUASAR BEAMS ══════════════ */
+  function makePulsar(x, y, z, color){
+    const g = new THREE.Group();
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(0.12,16,16), new THREE.MeshBasicMaterial({color:WHITE})));
+    for(let s of [-1,1]){
+      const beam = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.015, 0.0, 2.5, 6),
+        new THREE.MeshBasicMaterial({color, transparent:true, opacity:0.35, blending:THREE.AdditiveBlending})
+      );
+      beam.position.y = s * 1.25;
+      g.add(beam);
+    }
+    g.add(new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.015, 4, 32), new THREE.MeshBasicMaterial({color, transparent:true, opacity:0.5})));
+    g.position.set(x,y,z);
+    universeGroup.add(g);
+    return g;
+  }
+
+  const pulsars = [
+    makePulsar(-5.5, 3, -5, BLUE),
+    makePulsar(5.0, -8, -4.5, PURPLE),
+    makePulsar(-4.5, -20, -6, CYAN),
+  ];
+
+  /* ══════════════ 13. ASTEROID BELT ══════════════ */
+  function makeAsteroidBelt(cx, cy, cz, beltRadius, count, spread){
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array(count*3);
+    for(let i=0;i<count;i++){
+      const angle = (i/count)*Math.PI*2 + (Math.random()-0.5)*0.3;
+      const r = beltRadius + (Math.random()-0.5)*spread;
+      pos[i*3]   = Math.cos(angle)*r + cx;
+      pos[i*3+1] = (Math.random()-0.5)*spread*0.4 + cy;
+      pos[i*3+2] = Math.sin(angle)*r + cz;
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    return new THREE.Points(geo, new THREE.PointsMaterial({color:0x887766, size:0.035, transparent:true, opacity:0.6, sizeAttenuation:true}));
+  }
+
+  universeGroup.add(makeAsteroidBelt(0, -5, -6,  4.5, 400, 0.8));
+  universeGroup.add(makeAsteroidBelt(-2,-16, -7, 3.8, 300, 0.6));
+
+  /* ══════════════ 14. COMET ══════════════ */
+  const cometGroup = new THREE.Group();
+  const cometHead = new THREE.Mesh(new THREE.SphereGeometry(0.08,12,12), new THREE.MeshBasicMaterial({color:WHITE}));
+  cometGroup.add(cometHead);
+  const cometTail = new THREE.Mesh(
+    new THREE.ConeGeometry(0.04, 1.8, 6),
+    new THREE.MeshBasicMaterial({color:0xaaddff, transparent:true, opacity:0.25, blending:THREE.AdditiveBlending})
+  );
+  cometTail.rotation.z = Math.PI/2;
+  cometTail.position.x = -0.9;
+  cometGroup.add(cometTail);
+  universeGroup.add(cometGroup);
+
+  let cometT = 0;
+
+  /* ══════════════ SCROLL & MOUSE STATE ══════════════ */
+  let scrollY = 0, targetScrollY = 0;
+  let mouseX = 0, mouseY = 0, targetMX = 0, targetMY = 0;
+  let lastScrollY = 0;
+  let scrollVelocity = 0;
+  let scrollImpulse = 0;
+
+  window.addEventListener('scroll', ()=>{
+    targetScrollY = window.scrollY;
+    const delta = window.scrollY - lastScrollY;
+    scrollImpulse += Math.abs(delta) * 0.05;
+    lastScrollY = window.scrollY;
+  });
+  window.addEventListener('mousemove', e=>{
+    targetMX = (e.clientX/window.innerWidth  - 0.5)*2;
+    targetMY = (e.clientY/window.innerHeight - 0.5)*2;
+  });
+  window.addEventListener('resize', ()=>{
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  /* ══════════════ ANIMATION LOOP ══════════════ */
+  const clock = new THREE.Clock();
+
+  function animate(){
+    requestAnimationFrame(animate);
+    const t = clock.getElapsedTime();
+
+    scrollY += (targetScrollY - scrollY) * 0.06;
+    scrollImpulse *= 0.92;
+    mouseX += (targetMX - mouseX) * 0.07;
+    mouseY += (targetMY - mouseY) * 0.07;
+
+    camera.position.y = -scrollY * 0.0032;
+    camera.position.x = mouseX * 0.22;
+    camera.rotation.x = -mouseY * 0.020;
+    camera.rotation.y = mouseX * 0.020;
+
+    universeGroup.rotation.y = t * 0.003 + mouseX * 0.015;
+
+    galaxy1.rotation.y = t * 0.018;
+    galaxy1.rotation.z = t * 0.006;
+    galaxy1.position.y = -scrollY * 0.0008;
+    galaxy2.rotation.y = -t * 0.015;
+    galaxy2.position.y = -10 - scrollY * 0.001;
+    galaxy3.rotation.y = t * 0.020;
+    galaxy3.position.y = -18 - scrollY * 0.0006;
+
+    starLayers.forEach((l,i)=>{
+      l.rotation.y = t * 0.004 * (i+1);
+      l.position.y = -scrollY * (0.0005 + i*0.0003);
+      l.material.opacity = 0.5 + Math.sin(t*0.3 + i)*0.2;
+    });
+
+    nebulae.forEach((n,i)=>{
+      n.material.opacity = (0.12 + Math.sin(t*0.2+i)*0.06);
+      n.position.y += Math.sin(t*0.1+i*0.8)*0.002;
+    });
+
+    brightStars.forEach((s,i)=>{
+      const twinkle = 0.5 + Math.sin(t*2.5+s.phase)*0.5;
+      s.halo.material.opacity = twinkle * s.baseOpacity;
+      s.group.position.y = s.group.position.y + Math.sin(t*0.15+s.phase)*0.0005;
+    });
+
+    planet1.rotation.y = t * 0.08;
+    planet1.position.y = 1.8 + Math.sin(t*0.12)*0.25 - scrollY*0.0018;
+    planet2.rotation.y = -t * 0.06;
+    planet2.position.y = -7 + Math.sin(t*0.09)*0.20 - scrollY*0.0015;
+    planet3.rotation.y = t * 0.07;
+    planet3.position.y = -16 + Math.sin(t*0.11)*0.22 - scrollY*0.0012;
+    planet4.rotation.y = -t * 0.09;
+    planet4.position.y = -22 + Math.sin(t*0.13)*0.18 - scrollY*0.0008;
+
+    cRings.forEach((r,i)=>{
+      r.rotation.z = t * (0.010 + i*0.005) * (i%2===0?1:-1);
+      r.rotation.x += 0.0005;
+    });
+
+    pulsars.forEach((p,i)=>{
+      p.rotation.y = t*0.5 + i;
+      p.children[0].material.opacity = 0.6 + Math.sin(t*3+i)*0.4;
+      if(p.children[1]) p.children[1].scale.y = 1+Math.sin(t*2.5+i)*0.3;
+      if(p.children[2]) p.children[2].scale.y = 1+Math.sin(t*2.5+i+1)*0.3;
+    });
+
+    polyhedra.forEach((s,idx)=>{
+      const scrollReactAmp = 1 + scrollImpulse * 2;
+      s.g.rotation.x += s.rotX * scrollReactAmp;
+      s.g.rotation.y += s.rotY * scrollReactAmp;
+      s.g.rotation.z += s.rotZ;
+      const floatY = Math.sin(t*s.floatSpeed + s.phase) * s.floatAmp;
+      const scrollOffset = scrollY * s.scrollFactor * 0.0032;
+      s.g.position.y = s.baseY + floatY - scrollOffset;
+      s.g.position.x = s.baseX + Math.sin(t*0.1+s.phase)*0.12;
+      const scaleBoost = 1 + scrollImpulse * 0.05;
+      s.g.scale.setScalar(scaleBoost);
+    });
+
+    knots.forEach(k=>{
+      k.mesh.rotation.x += k.rotX * (1 + scrollImpulse);
+      k.mesh.rotation.y += k.rotY * (1 + scrollImpulse);
+      k.mesh.position.y = k.baseY + Math.sin(t*0.12+k.phase)*0.18 - scrollY * k.scrollFactor * 0.003;
+    });
+
+    shootingStars.forEach(m=>{
+      if(!m.active){
+        m.delay -= 0.016;
+        if(m.delay <= 0){
+          m.active = true;
+          m.life = 0;
+          m.line.position.set(
+            (Math.random()-0.5)*28,
+            Math.random()*12 + 4 - scrollY*0.002,
+            -(Math.random()*8+2)
+          );
+        }
+      } else {
+        m.life += 0.016;
+        const prog = m.life / m.maxLife;
+        m.mat.opacity = prog < 0.2 ? prog*5 : prog > 0.8 ? (1-prog)*5 : 1;
+        m.line.position.x += m.speed * 1.5;
+        m.line.position.y -= m.speed * 0.7;
+        if(m.life > m.maxLife){
+          m.active = false;
+          m.delay = Math.random()*8 + 2;
+          m.mat.opacity = 0;
+        }
+      }
+    });
+
+    cometT += 0.004;
+    const cometAngle = cometT;
+    const cometR = 8;
+    cometGroup.position.x = Math.cos(cometAngle)*cometR;
+    cometGroup.position.y = Math.sin(cometAngle)*cometR*0.4 - scrollY*0.0015;
+    cometGroup.position.z = -5 + Math.sin(cometAngle*0.5)*2;
+    cometGroup.rotation.z = Math.atan2(-0.4, 1) + cometAngle;
+
+    const dp = dustGeo.attributes.position.array;
+    for(let i=0;i<DUST_COUNT;i++){
+      dp[i*3]   += dustVel[i*3];
+      dp[i*3+1] += dustVel[i*3+1];
+      if(dp[i*3]>15)   dp[i*3]=-15;
+      if(dp[i*3]<-15)  dp[i*3]=15;
+      if(dp[i*3+1]>30) dp[i*3+1]=-30;
+      if(dp[i*3+1]<-30)dp[i*3+1]=30;
+    }
+    dustGeo.attributes.position.needsUpdate = true;
+    dustMesh.position.y = -scrollY * 0.0025;
+    dustMesh.material.opacity = 0.25 + Math.sin(t*0.35)*0.15;
+
+    sunLight.intensity = 3.5 + Math.sin(t*1.2)*1.0;
+    sunLight.position.x = 6 + Math.sin(t*0.3)*3;
+    sunLight.position.y = 4 + Math.cos(t*0.25)*2 - scrollY*0.002;
+    blueLight.position.y = -3 + Math.sin(t*0.2)*3 - scrollY*0.0015;
+    purpleLight.intensity = 1.0 + Math.sin(t*0.7)*0.5;
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   PAGE / NAV / SCROLL / CONTACT
+══════════════════════════════════════════════════════════════ */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  window.scrollTo(0,0);
+  setTimeout(initReveal,100);
+}
+function goHome(){showPage('home')}
+function openService(s){showPage(s)}
+function scrollToId(id){
+  const cur = document.querySelector('.page.active').id;
+  if(cur!=='page-home'){
+    showPage('home');
+    setTimeout(()=>{ const el=document.getElementById(id); if(el)el.scrollIntoView({behavior:'smooth'}); },300);
+  } else {
+    const el=document.getElementById(id); if(el)el.scrollIntoView({behavior:'smooth'});
+  }
+}
+
+function initReveal(){
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting) e.target.classList.add('visible');
+      else e.target.classList.remove('visible');
+    });
+  },{threshold:0.10, rootMargin:'-30px'});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+}
+initReveal();
+
+function getFormData(){
+  return{
+    name:     document.getElementById('contactName')?.value.trim()||'',
+    business: document.getElementById('contactBusiness')?.value.trim()||'',
+    service:  document.getElementById('contactService')?.value.trim()||'',
+    budget:   document.getElementById('contactBudget')?.value.trim()||'',
+    message:  document.getElementById('contactMessage')?.value.trim()||''
+  };
+}
+function validateForm(d){
+  if(!d.name||!d.business||!d.service){alert('Please fill in: Full Name, Business Name, and Service Needed');return false;}
+  return true;
+}
+function sendWhatsApp(){
+  const d=getFormData(); if(!validateForm(d))return;
+  const msg=`New Lead from Vyut Website\n\nName: ${d.name}\nBusiness: ${d.business}\nService: ${d.service}\nBudget: ${d.budget||'Not specified'}\nMessage: ${d.message||'No message'}`;
+  window.open(`https://wa.me/918118895016?text=${encodeURIComponent(msg)}`,'_blank');
+}
+function sendEmail(){
+  const d=getFormData(); if(!validateForm(d))return;
+  const body=`Name: ${d.name}\n\nBusiness: ${d.business}\n\nService: ${d.service}\n\nBudget: ${d.budget||'Not specified'}\n\nMessage:\n${d.message||'No message'}`;
+  window.location.href=`mailto:yourmail@gmail.com?subject=New Project Inquiry - Vyut&body=${encodeURIComponent(body)}`;
+}
+function contactPlan(planName){
+  const msg=`Hello Vyut, I'm interested in the ${planName}.\n\nMy Name:\nBusiness:\nRequirements:\nTimeline:\n\nPlease share next steps.`;
+  window.open(`https://wa.me/918118895016?text=${encodeURIComponent(msg)}`,'_blank');
+}
+</script>
+</body>
+</html>
